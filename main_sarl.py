@@ -2,6 +2,7 @@ from marl.sarl_trainer import train_sarl
 from marl.agent import Actor
 from marl.critic import Critic
 from env.stacked_ris_env import StackedRISEnv
+import torch
 import torch.optim as optim
 
 K, N, q_bits = 2, 8, 2
@@ -21,8 +22,16 @@ critic_sarl.train()
 opt_actor = optim.Adam(actor_sarl.parameters(), lr=1e-3)
 opt_critic = optim.Adam(critic_sarl.parameters(), lr=1e-3)
 
+# ===== TRAINING LOOP =====
 for episode in range(10000):
-    train_sarl(env, actor_sarl, critic_sarl, opt_actor, opt_critic)
+    G = train_sarl(env, actor_sarl, critic_sarl, opt_actor, opt_critic)
 
-    if episode % 500 == 0:
+    if episode % 100 == 0:
         print(f"SARL training episode {episode}")
+        print("SARL Return G =", G)
+
+# ===== SAVE TRAINED SARL ACTOR =====
+torch.save(
+    actor_sarl.state_dict(),
+    "sarl_actor.pth"
+)
